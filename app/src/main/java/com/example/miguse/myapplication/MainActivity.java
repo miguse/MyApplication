@@ -1,16 +1,25 @@
 package com.example.miguse.myapplication;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import com.facebook.FacebookSdk;
+import android.view.View;
+import android.widget.Button;
 
-public class MainActivity extends AppCompatActivity {
+import com.facebook.AccessToken;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookSdk;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
+import com.facebook.HttpMethod;
+import com.facebook.login.widget.LoginButton;
+
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+
+    LoginButton loginButton;
+    CallbackManager callbackManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,9 +36,48 @@ public class MainActivity extends AppCompatActivity {
 //                        .setAction("Action", null).show();
 //            }
 //        });
+
         super.onCreate(savedInstanceState);
-        // Add
         FacebookSdk.sdkInitialize(getApplicationContext());
+
+        setContentView(R.layout.activity_main);
+
+        loginButton = (LoginButton) findViewById(R.id.login_button);
+        loginButton.setReadPermissions("user_posts");
+        callbackManager = CallbackManager.Factory.create();
+
+        Button btnGraphApiTest = (Button) findViewById(R.id.btnGraphApiTest);
+        btnGraphApiTest.setOnClickListener(this);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        callbackManager.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.btnGraphApiTest:
+                GraphApiTest();
+                break;
+
+        }
+    }
+
+    private void GraphApiTest() {
+        new GraphRequest(
+                AccessToken.getCurrentAccessToken(),
+                "/me/feed",
+                null,
+                HttpMethod.GET,
+                new GraphRequest.Callback() {
+                    public void onCompleted(GraphResponse response) {
+//                        Log.i(TAG, response.getJSONObject().toString());
+                    }
+                }
+        ).executeAsync();
     }
 
     @Override
@@ -53,5 +101,4 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
 }
